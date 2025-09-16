@@ -65,7 +65,7 @@ const ProductManagement = () => {
                 Criar Novo Produto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <ProductForm 
                 onSuccess={() => setIsCreateModalOpen(false)}
               />
@@ -234,7 +234,7 @@ const ProductManagement = () => {
                                   <Edit2 className="h-3 w-3" />
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent className="max-w-2xl">
+                              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                                 {editingProduct && (
                                   <ProductForm 
                                     product={editingProduct}
