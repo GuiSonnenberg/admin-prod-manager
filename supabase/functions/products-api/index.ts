@@ -112,8 +112,25 @@ serve(async (req) => {
       console.log('API Response:', apiData);
       
       // Transformar resposta da API externa para o formato esperado pelo frontend
+      const products = apiData.data?.products || apiData.products || apiData.data || [];
+      
+      // Transformar produtos para converter objetos de imagem em URLs
+      const transformedProducts = products.map((product: any) => {
+        let images = product.images || [];
+        
+        // Se images é um array de objetos com url, extrair apenas as URLs
+        if (Array.isArray(images) && images.length > 0 && typeof images[0] === 'object' && images[0].url) {
+          images = images.map((img: any) => img.url);
+        }
+        
+        return {
+          ...product,
+          images
+        };
+      });
+      
       const transformedData = {
-        data: apiData.data?.products || apiData.products || apiData.data || [],
+        data: transformedProducts,
         pagination: {
           page: apiData.data?.currentPage || apiData.currentPage || 1,
           limit: apiData.data?.limit || apiData.limit || 10,
@@ -136,10 +153,16 @@ serve(async (req) => {
         body: JSON.stringify(body),
       });
       
-      const data = await response.json();
-      console.log('Product created successfully:', data);
+      const apiData = await response.json();
+      console.log('Product created successfully:', apiData);
       
-      return new Response(JSON.stringify(data), {
+      // Transformar imagens se necessário
+      let product = apiData.data || apiData;
+      if (product.images && Array.isArray(product.images) && product.images.length > 0 && typeof product.images[0] === 'object' && product.images[0].url) {
+        product.images = product.images.map((img: any) => img.url);
+      }
+      
+      return new Response(JSON.stringify(product), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -153,10 +176,16 @@ serve(async (req) => {
         body: JSON.stringify(body),
       });
       
-      const data = await response.json();
-      console.log('Product updated successfully:', data);
+      const apiData = await response.json();
+      console.log('Product updated successfully:', apiData);
       
-      return new Response(JSON.stringify(data), {
+      // Transformar imagens se necessário
+      let product = apiData.data || apiData;
+      if (product.images && Array.isArray(product.images) && product.images.length > 0 && typeof product.images[0] === 'object' && product.images[0].url) {
+        product.images = product.images.map((img: any) => img.url);
+      }
+      
+      return new Response(JSON.stringify(product), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
