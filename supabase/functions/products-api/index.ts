@@ -94,16 +94,17 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url);
-    const method = req.method;
-    const body = method !== 'GET' ? await req.json() : null;
+    const body = await req.json();
+    const method = body.method || 'GET';
+    const productId = body.productId;
+    const params = body.params || {};
 
-    console.log(`${method} request to products-api`, { path: url.pathname, body });
+    console.log(`${method} request to products-api`, { method, productId, body });
 
     // GET /products - Lista produtos com filtros
-    if (method === 'GET' && url.pathname.includes('/products')) {
-      const params = new URLSearchParams(url.search);
-      const queryString = params.toString();
+    if (method === 'GET') {
+      const queryParams = new URLSearchParams(params);
+      const queryString = queryParams.toString();
       const endpoint = `/admin/products${queryString ? `?${queryString}` : ''}`;
       
       const response = await makeAuthenticatedRequest(endpoint);
@@ -147,10 +148,13 @@ serve(async (req) => {
     }
 
     // POST /products - Criar produto
-    if (method === 'POST' && url.pathname.includes('/products')) {
+    if (method === 'POST') {
+      // Remover campos de controle antes de enviar para a API
+      const { method: _, params: __, ...productData } = body;
+      
       const response = await makeAuthenticatedRequest('/admin/products', {
         method: 'POST',
-        body: JSON.stringify(body),
+        body: JSON.stringify(productData),
       });
       
       const apiData = await response.json();
@@ -169,11 +173,13 @@ serve(async (req) => {
     }
 
     // PUT /products/:id - Atualizar produto
-    if (method === 'PUT' && url.pathname.includes('/products/')) {
-      const productId = url.pathname.split('/').pop();
+    if (method === 'PUT' && productId) {
+      // Remover campos de controle antes de enviar para a API
+      const { method: _, productId: __, params: ___, ...productData } = body;
+      
       const response = await makeAuthenticatedRequest(`/admin/products/${productId}`, {
         method: 'PUT',
-        body: JSON.stringify(body),
+        body: JSON.stringify(productData),
       });
       
       const apiData = await response.json();
@@ -192,8 +198,7 @@ serve(async (req) => {
     }
 
     // DELETE /products/:id - Deletar produto
-    if (method === 'DELETE' && url.pathname.includes('/products/')) {
-      const productId = url.pathname.split('/').pop();
+    if (method === 'DELETE' && productId) {
       const response = await makeAuthenticatedRequest(`/admin/products/${productId}`, {
         method: 'DELETE',
       });

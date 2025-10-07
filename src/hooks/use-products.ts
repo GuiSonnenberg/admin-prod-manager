@@ -13,8 +13,11 @@ async function fetchProducts(filters: ProductFilters = {}): Promise<ProductsResp
   if (filters.order) params.append('order', filters.order);
   if (filters.isActive !== undefined) params.append('isActive', filters.isActive.toString());
 
-  const { data, error } = await supabase.functions.invoke('products-api/products', {
-    method: 'GET',
+  const { data, error } = await supabase.functions.invoke('products-api', {
+    body: { 
+      method: 'GET',
+      params: Object.fromEntries(params)
+    },
   });
 
   if (error) {
@@ -26,9 +29,11 @@ async function fetchProducts(filters: ProductFilters = {}): Promise<ProductsResp
 }
 
 async function createProduct(data: CreateProductData): Promise<Product> {
-  const { data: result, error } = await supabase.functions.invoke('products-api/products', {
-    method: 'POST',
-    body: data,
+  const { data: result, error } = await supabase.functions.invoke('products-api', {
+    body: { 
+      method: 'POST',
+      ...data 
+    },
   });
 
   if (error) {
@@ -40,9 +45,12 @@ async function createProduct(data: CreateProductData): Promise<Product> {
 }
 
 async function updateProduct(id: string, data: UpdateProductData): Promise<Product> {
-  const { data: result, error } = await supabase.functions.invoke(`products-api/products/${id}`, {
-    method: 'PUT',
-    body: data,
+  const { data: result, error } = await supabase.functions.invoke('products-api', {
+    body: { 
+      method: 'PUT',
+      productId: id,
+      ...data 
+    },
   });
 
   if (error) {
