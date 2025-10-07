@@ -39,7 +39,9 @@ async function getAuthToken(): Promise<string> {
   }
 
   const data = await response.json();
-  authToken = data.token || data.access_token || data.accessToken;
+  
+  // A API retorna o token em data.data.tokens.accessToken
+  authToken = data.data?.tokens?.accessToken || data.token || data.access_token || data.accessToken;
   
   if (!authToken) {
     console.error('No token in response:', data);
