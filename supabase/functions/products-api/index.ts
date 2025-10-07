@@ -125,8 +125,17 @@ serve(async (req) => {
         }
         
         return {
-          ...product,
-          images
+          id: product.productId || product._id || product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          promotionalPrice: product.promotionalPrice,
+          isPromotionActive: product.isPromotionActive,
+          stockQuantity: product.stockQuantity,
+          images,
+          isActive: product.isActive,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
         };
       });
       
@@ -149,8 +158,19 @@ serve(async (req) => {
 
     // POST /products - Criar produto
     if (method === 'POST') {
-      // Remover campos de controle antes de enviar para a API
-      const { method: _, params: __, ...productData } = body;
+      // Extrair apenas os campos válidos para a API externa
+      const productData = {
+        name: body.name,
+        description: body.description,
+        price: body.price,
+        promotionalPrice: body.promotionalPrice,
+        isPromotionActive: body.isPromotionActive,
+        stockQuantity: body.stockQuantity,
+        images: body.images || [],
+        isActive: body.isActive !== undefined ? body.isActive : true,
+      };
+      
+      console.log('Creating product with data:', productData);
       
       const response = await makeAuthenticatedRequest('/admin/products', {
         method: 'POST',
@@ -174,8 +194,19 @@ serve(async (req) => {
 
     // PUT /products/:id - Atualizar produto
     if (method === 'PUT' && productId) {
-      // Remover campos de controle antes de enviar para a API
-      const { method: _, productId: __, params: ___, ...productData } = body;
+      // Extrair apenas os campos válidos para a API externa
+      const productData: any = {};
+      
+      if (body.name !== undefined) productData.name = body.name;
+      if (body.description !== undefined) productData.description = body.description;
+      if (body.price !== undefined) productData.price = body.price;
+      if (body.promotionalPrice !== undefined) productData.promotionalPrice = body.promotionalPrice;
+      if (body.isPromotionActive !== undefined) productData.isPromotionActive = body.isPromotionActive;
+      if (body.stockQuantity !== undefined) productData.stockQuantity = body.stockQuantity;
+      if (body.images !== undefined) productData.images = body.images;
+      if (body.isActive !== undefined) productData.isActive = body.isActive;
+      
+      console.log('Updating product with data:', productData);
       
       const response = await makeAuthenticatedRequest(`/admin/products/${productId}`, {
         method: 'PUT',
