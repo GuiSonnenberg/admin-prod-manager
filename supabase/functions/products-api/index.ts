@@ -107,11 +107,24 @@ serve(async (req) => {
       const endpoint = `/admin/products${queryString ? `?${queryString}` : ''}`;
       
       const response = await makeAuthenticatedRequest(endpoint);
-      const data = await response.json();
+      const apiData = await response.json();
       
-      console.log('Products fetched successfully:', data);
+      console.log('API Response:', apiData);
       
-      return new Response(JSON.stringify(data), {
+      // Transformar resposta da API externa para o formato esperado pelo frontend
+      const transformedData = {
+        data: apiData.data?.products || apiData.products || apiData.data || [],
+        pagination: {
+          page: apiData.data?.currentPage || apiData.currentPage || 1,
+          limit: apiData.data?.limit || apiData.limit || 10,
+          total: apiData.data?.totalProducts || apiData.totalProducts || apiData.total || 0,
+          totalPages: apiData.data?.totalPages || apiData.totalPages || 1,
+        }
+      };
+      
+      console.log('Transformed data:', transformedData);
+      
+      return new Response(JSON.stringify(transformedData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
