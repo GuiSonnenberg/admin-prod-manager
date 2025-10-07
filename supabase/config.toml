@@ -1,0 +1,10 @@
+project_id = "zhocomqzmwrqwxblobfb"
+
+[auth]
+enabled = true
+site_url = "http://localhost:8080"
+additional_redirect_urls = []
+jwt_expiry = 3600
+
+[functions.products-api]
+verify_jwt = false
